@@ -18,6 +18,9 @@ INPUT_COUNT = IMAGE_WIDTH * IMAGE_HEIGHT
 OUTPUT_COUNT = 10 # There are ten different digits (0,1,2,3,4,5,6,7,8,9)
 NORMALIZATION_CONST = 255.0
 
+LEARNING_RATE = 0.01
+MOMENTUM_FACTOR = 0.9
+
 def get_batches(iterable, batch_size):
     # Based on code from a StackOverflow answer by Carl F.
     # https://stackoverflow.com/questions/8290397/how-to-split-an-iterable-in-constant-size-chunks
@@ -44,6 +47,14 @@ def parse_label(numeral):
 
 class neural_network:
     def __init__(self):
+        '''
+            X: Input Data vector
+            O(n): The matrix that determines the input into the sigmoid function of layer n+1
+            A(n): The matrix of activation values of the neurons in layer n
+            W(n): The weights of the neurons in the n-th layer (Input is layer 0)
+            V(n): The velocity vector for gradient descent
+            Guess: The neural networks guess as to what numeral it "sees"
+        '''
         self.W1 = np.asmatrix(np.random.rand(INPUT_COUNT,NEURON_COUNT_LAYER1) - 0.50)
         self.W2 = np.asmatrix(np.random.rand(NEURON_COUNT_LAYER1, NEURON_COUNT_LAYER2) - 0.50)
         self.W_out = np.asmatrix(np.random.rand(NEURON_COUNT_LAYER2, OUTPUT_COUNT) - 0.50)
@@ -81,9 +92,9 @@ class neural_network:
 
     def improve(self):
 
-        self.V1 = (0.9 * self.V1) + (0.02 * self.W1_grad)
-        self.V2 = (0.9 * self.V2) + (0.02 * self.W2_grad)
-        self.V_out = (0.9 * self.V_out) + (0.02 * self.W_out_grad)
+        self.V1 = (MOMENTUM_FACTOR * self.V1) + (LEARNING_RATE * self.W1_grad)
+        self.V2 = (MOMENTUM_FACTOR * self.V2) + (LEARNING_RATE * self.W2_grad)
+        self.V_out = (MOMENTUM_FACTOR * self.V_out) + (LEARNING_RATE * self.W_out_grad)
 
         self.W1 = self.W1 - self.V1
         self.W2 = self.W2 - self.V2
@@ -98,13 +109,14 @@ trainingData = [[image_train[n],label_train[n]] for n in range(len(image_train))
 def naive_training(neuralNet, num_epochs):
     print("Training the network (Naive algorithm)")
     for k in range(num_epochs):
-        for n in range(60000):
-            neuralNet.propagate(image_train[n])
-            neuralNet.error(parse_label([label_train[n]]))
+        print('Training epoch: ' + str(k+1))
+        np.random.shuffle(trainingData)
+        imageData = [trainingData[n][0] for n in range(len(trainingData))]
+        labelData = np.asmatrix([parse_label(trainingData[n][1]) for n in range(len(trainingData))])
+        for n in range(len(trainingData)):
+            neuralNet.propagate(imageData[n])
+            neuralNet.error(labelData[n])
             neuralNet.gradient()
-            if (n == 60000):
-                n = 0
-                k +=1
             neuralNet.improve()
 
 def BGD_training(neuralNet, num_epochs, batch_size):
@@ -137,9 +149,9 @@ def test(neuralNet):
 
 potato = neural_network()
 
-BGD_training(potato, 5, 50)
+BGD_training(potato, 5, 1)
 test(potato)
 
 kiwi = neural_network()
-naive_training(kiwi, 1)
+naive_training(kiwi, 5)
 test(kiwi)
