@@ -130,7 +130,6 @@ def BGD_training(neuralNet, num_epochs, batch_size):
             neuralNet.error(labelData)
             neuralNet.gradient()
             neuralNet.improve()
-            neuralNet.labelData = labelData
 
             
 image_test = np.divide(test_images, NORMALIZATION_CONST)
