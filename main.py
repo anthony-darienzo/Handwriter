@@ -53,7 +53,7 @@ class neural_network:
             A(n): The matrix of activation values of the neurons in layer n
             W(n): The weights of the neurons in the n-th layer (Input is layer 0)
             V(n): The velocity vector for gradient descent
-            Guess: The neural networks guess as to what numeral it "sees"
+            Guess: The neural network's guess as to what numeral it "sees"
         '''
         self.W1 = np.asmatrix(np.random.rand(INPUT_COUNT,NEURON_COUNT_LAYER1) - 0.50)
         self.W2 = np.asmatrix(np.random.rand(NEURON_COUNT_LAYER1, NEURON_COUNT_LAYER2) - 0.50)
@@ -148,7 +148,7 @@ def test(neuralNet):
 
 potato = neural_network()
 
-BGD_training(potato, 5, 1)
+BGD_training(potato, 5, 10)
 test(potato)
 
 kiwi = neural_network()
