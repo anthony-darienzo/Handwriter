@@ -3,6 +3,7 @@
 
 import numpy as np
 import sympy as sy
+import sys
 
 from mnist import MNIST
 mndata_training = MNIST('Training')
@@ -20,6 +21,27 @@ NORMALIZATION_CONST = 255.0
 
 LEARNING_RATE = 0.01
 MOMENTUM_FACTOR = 0.9
+
+def printProgress(i, i_max=False):
+    ''' Prints a progress bar '''
+    if (not i_max):
+        j = int(i / 100)
+        j = j % 10
+        printOW('Loading: ' + '.' * (j-1) + 'o' + '.' * (10-j))
+    else:
+        progress =  i/float(i_max)
+        progress = int(progress * 100)
+        j = int(i / 100)
+        j = j % 10
+        phrase = 'Loading: ' + str(progress) + '% '
+        printOW(phrase + '[' + ' ' * (j) + '=' + ' ' * (9-j) + ']')
+
+def printOW(string):
+    ''' Print to stdout, overwriting the current line. '''
+    sys.stdout.write('\r' + ' ' * 35)
+    sys.stdout.write('\r' + str(string))
+    sys.stdout.flush()
+
 
 def get_batches(iterable, batch_size):
     # Based on code from a StackOverflow answer by Carl F.
@@ -108,12 +130,14 @@ trainingData = [[image_train[n],label_train[n]] for n in range(len(image_train))
 
 def naive_training(neuralNet, num_epochs):
     print("Training the network (Naive algorithm)")
+    size = num_epochs * len(trainingData)
     for k in range(num_epochs):
         print('Training epoch: ' + str(k+1))
         np.random.shuffle(trainingData)
         imageData = [trainingData[n][0] for n in range(len(trainingData))]
         labelData = np.asmatrix([parse_label(trainingData[n][1]) for n in range(len(trainingData))])
         for n in range(len(trainingData)):
+            printProgress(n,i_max=size)
             neuralNet.propagate(imageData[n])
             neuralNet.error(labelData[n])
             neuralNet.gradient()
@@ -131,7 +155,7 @@ def BGD_training(neuralNet, num_epochs, batch_size):
             neuralNet.gradient()
             neuralNet.improve()
 
-            
+
 image_test = np.divide(test_images, NORMALIZATION_CONST)
 
 def test(neuralNet):
@@ -144,13 +168,13 @@ def test(neuralNet):
         if (neuralNet.guess[0] == test_labels[n]):
             success_count += 1
     print("Accuracy: " + str(success_count / 100.0) + "%") # Calculate % accuracy
-    
 
+'''
 potato = neural_network()
 
 BGD_training(potato, 5, 10)
 test(potato)
-
+'''
 kiwi = neural_network()
-naive_training(kiwi, 5)
+naive_training(kiwi, 1)
 test(kiwi)
